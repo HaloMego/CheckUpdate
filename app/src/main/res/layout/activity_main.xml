@@ -11,6 +11,7 @@
     <Button
         android:id="@+id/btn_checkupdate"
         android:layout_width="match_parent"
+        android:onClick="onCheck"
         android:layout_height="wrap_content"
         android:text="checkupdate" />
 </RelativeLayout>

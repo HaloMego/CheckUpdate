@@ -1,4 +1,4 @@
-package com.ume.update;
+package com.ume.update.listener;
 
 /**
  * Created by AlphaGo on 2017/7/13.

@@ -26,4 +26,9 @@ public class UpdateConstant {
     public static final int MSG_DOWNLOAD_RESULT = 0x110;
 
     public static final int MSG_DOWNLOAD_PROGRESS = 0x111;
+
+    public static final String ACTION_UPDATE_DEFAULT = "update.intent.action.DEFAULT";
+    public static final String ACTION_UPDATE_CANCEL = "update.intent.action.CANCEL";
+    public static  boolean  isNotificationCanceled;
+    public static final String KEY_EXTRA_APK_INFO = "KEY_EXTRA_APK_INFO";
 }

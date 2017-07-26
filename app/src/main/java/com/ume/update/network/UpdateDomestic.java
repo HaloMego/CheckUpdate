@@ -3,7 +3,7 @@ package com.ume.update.network;
 import android.content.Context;
 import android.util.Log;
 
-import com.ume.update.AppUpdateService;
+import com.ume.update.component.AppUpdateService;
 import com.ume.update.model.ApkInfo;
 import com.ume.update.model.UpdateConstant;
 import com.ume.update.utils.LogUtils;
@@ -26,23 +26,23 @@ import retrofit2.Response;
 
 public class UpdateDomestic {
     private static final String TAG = "Donald";
+    private static File tempFile;
 
-    public static void downloadApk(final Context context, final AppUpdateService service, String downUrl) {
+    public static void downloadApk(final Context context, final AppUpdateService service, final ApkInfo apkInfo) {
 
-        AppRestClient.newInstance().mAPIService.downLoadFile(downUrl).enqueue(new Callback<ResponseBody>() {
+        AppRestClient.newInstance().mAPIService.downLoadFile(apkInfo.getDownUrl()).enqueue(new Callback<ResponseBody>() {
 
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
                 if (response.isSuccessful()) {
-                    MyRunnable runnable = new MyRunnable(context, service, response);
+                    MyRunnable runnable = new MyRunnable(context, service, response, apkInfo);
                     ThreadPoolManager.getInstance().executor(runnable);
                 } else {
                     if (service != null) {
                         service.onUpdate(UpdateConstant.FLAG_DOWNLOAD_ERROR, ApkInfo.APK_SAVE_NAME);
                     }
                 }
-
             }
 
             @Override
@@ -63,10 +63,11 @@ public class UpdateDomestic {
         private int mPercentage;
         private int mFlag;
         private AppUpdateService mUpdateService;
-
+        private ApkInfo mApkInfo;
         private Response<ResponseBody> mResponse;
 
-        public MyRunnable(Context context, AppUpdateService updateService, Response<ResponseBody> response) {
+        public MyRunnable(Context context, AppUpdateService updateService, Response<ResponseBody> response, ApkInfo apkInfo) {
+            mApkInfo = apkInfo;
             mContext = context;
             mUpdateService = updateService;
             mResponse = response;
@@ -74,62 +75,59 @@ public class UpdateDomestic {
 
         @Override
         public void run() {
-
-            if (Utils.checkFileExistence(mContext, ApkInfo.APK_SAVE_NAME)) {
-                Utils.deleteApkFile(mContext, ApkInfo.APK_SAVE_NAME);
-            }
-
             if (Utils.isEnoughFreeSpace()) {
+                InputStream inputStream = null;
+                OutputStream outputStream = null;
                 try {
                     mUpdateService.onProgress(0);
-                    File futureStudioIconFile = new File(mContext.getExternalFilesDir(ApkInfo.APK_SAVE_DIR), ApkInfo.APK_SAVE_NAME);
-                    InputStream inputStream = null;
-                    OutputStream outputStream = null;
-                    try {
-                        byte[] fileReader = new byte[1024 * 500];
-                        long fileSize = mResponse.body().contentLength();
-                        long fileSizeDownloaded = 0;
-                        inputStream = mResponse.body().byteStream();
-                        outputStream = new FileOutputStream(futureStudioIconFile);
-                        while (true) {
-                            int read = inputStream.read(fileReader);
-                            if (read == -1) {
-                                break;
-                            }
-                            outputStream.write(fileReader, 0, read);
-                            fileSizeDownloaded += read;
-                            float tempPercent = mPercentage;
-                            mPercentage = (int) ((float) fileSizeDownloaded / fileSize * 100);
-                            if (mPercentage != tempPercent && mUpdateService != null) {
-                                mUpdateService.onProgress(mPercentage);
-                                LogUtils.d(TAG, "onResponse: onProgress " + mPercentage);
-                            }
-
+                    tempFile = new File(mContext.getExternalFilesDir(ApkInfo.APK_SAVE_DIR), mApkInfo.getVersionName() + ".temp");
+                    byte[] fileReader = new byte[1024 * 500];
+                    long fileSize = mResponse.body().contentLength();
+                    long fileSizeDownloaded = 0;
+                    inputStream = mResponse.body().byteStream();
+                    outputStream = new FileOutputStream(tempFile);
+                    while (true) {
+                        int read = inputStream.read(fileReader);
+                        if (read == -1) {
+                            break;
                         }
-                        mFlag = UpdateConstant.FLAG_DOWNLOAD_SUCCESS;
-                        outputStream.flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        mFlag = UpdateConstant.FLAG_DOWNLOAD_ERROR;
-                    } finally {
-                        if (inputStream != null) {
-                            inputStream.close();
-                        }
-
-                        if (outputStream != null) {
-                            outputStream.close();
+                        outputStream.write(fileReader, 0, read);
+                        fileSizeDownloaded += read;
+                        float tempPercent = mPercentage;
+                        mPercentage = (int) ((float) fileSizeDownloaded / fileSize * 100);
+                        if (mPercentage != tempPercent && mUpdateService != null) {
+                            mUpdateService.onProgress(mPercentage);
+                            LogUtils.d(TAG, "onResponse: onProgress " + mPercentage);
                         }
                     }
+                    outputStream.flush();
+                    mFlag = UpdateConstant.FLAG_DOWNLOAD_SUCCESS;
+                    Utils.renameFile(mContext, mApkInfo, tempFile);
                 } catch (IOException e) {
                     e.printStackTrace();
                     mFlag = UpdateConstant.FLAG_DOWNLOAD_ERROR;
+                } finally {
+                    Utils.deleteApkFile(mContext, mApkInfo.getVersionName() + ".temp");
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
+                    if (outputStream != null) {
+                        try {
+                            outputStream.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
                 }
             } else {
                 mFlag = UpdateConstant.FLAG_NO_ENOUGH_SPACE;
             }
-            mUpdateService.onUpdate(mFlag, ApkInfo.APK_SAVE_NAME);
-            Log.i(TAG, "Download succeeded");
+            mUpdateService.onUpdate(mFlag, mApkInfo.getVersionName());
         }
+
+
     }
 }
 

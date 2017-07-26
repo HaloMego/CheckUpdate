@@ -12,7 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name=".AppUpdateService"/>
+        <service android:name=".component.AppUpdateService">
+            <intent-filter>
+                <action android:name="update.intent.action.DEFAULT"/>
+                <action android:name="update.intent.action.CANCEL"/>
+            </intent-filter>
+        </service>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -24,9 +29,10 @@
                 android:resource="@xml/file_path"/>
         </provider>
 
-        <activity android:name=".MainActivity"
-                  android:screenOrientation="portrait"
-                >
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -34,14 +40,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".UpdateDialogActivity"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/Zm">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+        <activity
+            android:name=".component.UpdateDialogActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/UpdateDialogTheme">
         </activity>
     </application>
 

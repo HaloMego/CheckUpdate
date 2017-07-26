@@ -1,4 +1,4 @@
-package com.ume.update;
+package com.ume.update.component;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,8 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.ume.update.AppUpdateManager;
+import com.ume.update.R;
 import com.ume.update.model.ApkInfo;
 import com.ume.update.utils.LogUtils;
+import com.ume.update.utils.Utils;
 
 public class UpdateDialogActivity extends AppCompatActivity {
 
@@ -68,8 +71,12 @@ public class UpdateDialogActivity extends AppCompatActivity {
         if (null != mApkInfo) {
             String downUrl = mApkInfo.getDownUrl();
             LogUtils.i("Donald", downUrl);
-            if (!TextUtils.isEmpty(downUrl)) {
-                AppUpdateManager.getManager().bindUpdateService(downUrl);
+            if (Utils.checkFile(this, mApkInfo.getVersionName()) ) {
+                Utils.openDownloadFile(getApplicationContext(), mApkInfo.getVersionName());
+            } else {
+                if (!TextUtils.isEmpty(mApkInfo.getDownUrl())) {
+                    AppUpdateManager.getManager().bindUpdateService(mApkInfo);
+                }
             }
             finish();
         }

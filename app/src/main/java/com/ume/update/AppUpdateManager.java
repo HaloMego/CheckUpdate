@@ -7,12 +7,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.widget.Toast;
 
+import com.ume.update.component.AppUpdateService;
+import com.ume.update.component.UpdateDialogActivity;
+import com.ume.update.listener.IUpdateCheckListener;
 import com.ume.update.model.ApkInfo;
 import com.ume.update.model.UpdateConstant;
 import com.ume.update.network.AppCheckUpdate;
 import com.ume.update.utils.LogUtils;
-import com.ume.update.utils.ToastUtils;
 import com.ume.update.utils.Utils;
 
 
@@ -68,20 +71,19 @@ public class AppUpdateManager implements IUpdateCheckListener {
         AppCheckUpdate.getApkInfoFromApkUre(activity, this);
     }
 
-    public void bindUpdateService(String url) {
+    public void bindUpdateService(ApkInfo apkInfo) {
         Intent intent = new Intent(mApplication, AppUpdateService.class);
-        intent.putExtra(UpdateConstant.DOWNLOAD_URL, url);
+        intent.putExtra(UpdateConstant.KEY_EXTRA_APK_INFO, apkInfo);
         mApplication.bindService(intent, updateServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onSuccess(ApkInfo apkInfo, Activity activity) {
         String versionName = apkInfo.getVersionName();
-        int currentVersionCode = Utils.getAppVersionCode(mApplication);
-
+        String currentVersionCode = Utils.getAppVersionName(mApplication);
         if (!TextUtils.isEmpty(versionName)) {
             if (versionName.equals(String.valueOf(currentVersionCode))) {
-                ToastUtils.showShort(mApplication, "版本一样");
+                Toast.makeText(mApplication, "已经是最新版本", Toast.LENGTH_SHORT).show();
             } else {
                 UpdateDialogActivity.showDialogActivity(activity, apkInfo);
             }
