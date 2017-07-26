@@ -15,6 +15,7 @@ import com.ume.update.listener.IUpdateCheckListener;
 import com.ume.update.model.ApkInfo;
 import com.ume.update.model.UpdateConstant;
 import com.ume.update.network.AppCheckUpdate;
+import com.ume.update.utils.HandlerUtils;
 import com.ume.update.utils.LogUtils;
 import com.ume.update.utils.Utils;
 
@@ -56,7 +57,6 @@ public class AppUpdateManager implements IUpdateCheckListener {
                 AppUpdateService.AppUpdateBinder service1 = (AppUpdateService.AppUpdateBinder) service;
                 mUpdateService = service1.getService();
                 mUpdateService.downloadStart();
-
             }
 
             @Override
@@ -94,7 +94,12 @@ public class AppUpdateManager implements IUpdateCheckListener {
 
     @Override
     public void onFailure() {
-
+        HandlerUtils.postOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(mApplication, "服务器异常", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 

@@ -14,9 +14,9 @@ public interface APIService {
     Call<ResponseBody> downLoadFile(@Url String fileUrl);
 
 
-    @GET("http://android.myapp.com/myapp/detail.htm?apkName=com.huimai365")
-    Call<String> getAPKInfoFromTencent();
+    @GET
+    Call<String> getAPKInfoFromTencent(@Url String fileUrl);
 
-    @GET("http://www.wandoujia.com/apps/com.huimai365")
-    Call<String> getAPKInfoFromPure();
+    @GET
+    Call<String> getAPKInfoFromPure(@Url String fileUrl);
 }
