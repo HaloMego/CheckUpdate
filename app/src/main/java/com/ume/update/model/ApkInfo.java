@@ -1,10 +1,13 @@
 package com.ume.update.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by WannaDie on 2017/7/12.
  */
 
-public class ApkInfo {
+public class ApkInfo implements Parcelable {
     public static final String APK_SAVE_NAME="APP.apk";
     public static final String APK_SAVE_DIR="app";
     private String versionName;
@@ -62,5 +65,15 @@ public class ApkInfo {
                 ", feature='" + feature + '\'' +
                 ", size='" + size + '\'' +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
     }
 }

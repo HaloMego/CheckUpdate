@@ -105,7 +105,6 @@ public class AppUpdateService extends Service implements IUpdateDownloadListener
                 break;
         }
 
-//        mUpdateDialogListener.onDismiss();
 
     }
 

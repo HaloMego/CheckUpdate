@@ -1,7 +1,6 @@
 package com.ume.update.network;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -54,6 +53,7 @@ public class AppCheckUpdate {
                     apkInfo.setFeature(content);
                     Log.i(TAG, "onResponse: " + apkInfo);
 
+
                     manager.onSuccess(apkInfo, activity);
                 }
             }
@@ -66,7 +66,7 @@ public class AppCheckUpdate {
         });
     }
 
-    public static void getApkInfoFromApkure(final Context context, final AppUpdateManager manager) {
+    public static void getApkInfoFromApkure(final Activity activity, final AppUpdateManager manager) {
         AppRestClient.newInstance().mAPIService.getAPKInfoFromPure().enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
@@ -80,7 +80,7 @@ public class AppCheckUpdate {
                     int engk = k - 3;
                     String size = body.substring(beginI, engk);
                     ApkInfo apkInfo = new ApkInfo();
-
+                    apkInfo.setSize(size);
                     int l = body.lastIndexOf("版本");
                     int m = body.indexOf("nbsp", l);
                     int beiginM = m + 5;
@@ -88,22 +88,25 @@ public class AppCheckUpdate {
                     int n = body.indexOf("dd", m);
                     int endN = n - 2;
                     String version = body.substring(beiginM, endN);
-
+                    apkInfo.setSize(version);
                     int o = body.indexOf("change-info");
                     int p = body.indexOf("con", o);
                     int beginO = p + 5;
                     int q = body.indexOf("div", p);
                     int endQ = q - 2;
                     String feature = body.substring(beginO, endQ);
-
-                    int r =body.indexOf("qr-info");
-                    int s = body.indexOf("href",r);
-                    int beiginR =s+6;
+                    apkInfo.setFeature(feature);
+                    int r = body.indexOf("qr-info");
+                    int s = body.indexOf("href", r);
+                    int beiginR = s + 6;
                     int t = body.indexOf("rel", r);
-                    int endT=t-1;
+                    int endT = t - 1;
                     String downUrl = body.substring(beiginR, endT);
+                    apkInfo.setDownUrl(downUrl);
+                    Log.i(TAG, "onResponse: " + downUrl);
 
-                    Log.i(TAG, "onResponse: "+downUrl);
+
+                    manager.onSuccess(apkInfo, activity);
 
 
                 }

@@ -1,7 +1,6 @@
 package com.ume.update;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -113,37 +112,12 @@ public class AppUpdateManager implements IUpdateCheckListener {
             if (versionName.equals(String.valueOf(currentVersionCode))) {
                 ToastUtils.showShort(mApplication, "版本一样");
             } else {
-                showUpdateDialog(versionName, "Apk 信息特征", downUrl, activity);
+                UpdateDialogActiviity.showDialogActivity(activity,apkInfo);
             }
 
         }
 
     }
-
-    private void showUpdateDialog(String versionName, String features, final String url, Activity activity) {
-        initProgressDialog(activity);
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(activity);
-        alertBuilder.setTitle("更新应用 V" + versionName);
-        alertBuilder.setMessage(features);
-        alertBuilder.setCancelable(true);
-        alertBuilder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                bindUpdateService(url);
-
-            }
-        });
-        alertBuilder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        alertBuilder.create().show();
-    }
-
 
     @Override
     public void onFailure() {
